@@ -1,8 +1,16 @@
-const Sequelize = require('sequelize');
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
 
-const sequelize = new Sequelize('node-udemy', 'root', '', {
-    dialect: 'mysql', 
-    host: 'localhost'
-});
 
-module.exports = sequelize;
+const mongoConnect = (callback) => {
+    MongoClient.connect(process.env.MONGO_DB_CONNECTION_URL)
+    .then(result => {
+        console.log('connected');
+        callback(result);
+    })
+    .catch(err => console.log(err));
+}
+
+
+module.exports = mongoConnect;
+
