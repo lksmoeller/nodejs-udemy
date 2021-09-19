@@ -13,10 +13,19 @@ exports.postAddProduct = (req, res, next) => {
 	const imageUrl = req.body.imageUrl;
 	const price = req.body.price;
 	const description = req.body.description;
-	const product = new Product(title, price, description, imageUrl, null, req.user._id);
-	product.save().then(() => {
-		res.redirect('/');
+	const product = new Product({
+		title: title,
+		price: price,
+		description: description,
+		imageUrl: imageUrl,
+		userId: req.user,
 	});
+	product
+		.save()
+		.then(() => {
+			res.redirect('/admin/products');
+		})
+		.catch((err) => console.log(err));
 };
 
 exports.getEditProduct = (req, res, next) => {
@@ -25,7 +34,7 @@ exports.getEditProduct = (req, res, next) => {
 		return res.redirect('/');
 	}
 	const prodId = req.params.productId;
-	Product.fetchById(prodId).then((product) => {
+	Product.findById(prodId).then((product) => {
 		if (!product) {
 			return res.redirect('/');
 		}
@@ -44,21 +53,22 @@ exports.postEditProduct = (req, res, next) => {
 	const updatePrice = req.body.price;
 	const updatedImageUrl = req.body.imageUrl;
 	const updatedDescription = req.body.description;
-	const product = new Product(
-		updatedTitle,
-		updatePrice,
-		updatedDescription,
-		updatedImageUrl,
-		prodId
-	);
-	product
-		.save()
+	Product.findById(prodId)
+		.then((product) => {
+			product.title = updatedTitle;
+			product.price = updatePrice;
+			product.description = updatedDescription;
+			product.imageUrl = updatedImageUrl;
+			return product.save();
+		})
 		.then(() => res.redirect('/admin/products'))
 		.catch((err) => console.log(err));
 };
 
 exports.getProducts = (req, res, next) => {
-	Product.fetchAll()
+	Product.find()
+		// .select('price description')
+		// .populate('userId', 'name')
 		.then((products) => {
 			res.render('admin/products', {
 				prods: products,
@@ -71,7 +81,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
 	const prodId = req.body.productId;
-	Product.deleteById(prodId)
+	Product.findByIdAndRemove(prodId)
 		.then(() => res.redirect('/admin/products'))
 		.catch((err) => console.log(err));
 };

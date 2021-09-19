@@ -3,9 +3,9 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 
 const errorController = require('./controllers/error');
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 
 const app = express();
@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use((req, res, next) => {
 	User.findById(process.env.MONGO_DB_USER_ID)
 		.then((user) => {
-			req.user = new User(user.name, user.email, user._id, user.cart);
+			req.user = user;
 			next();
 		})
 		.catch((err) => console.log(err));
@@ -34,6 +34,19 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoConnect(() => {
-	app.listen(8080);
-});
+mongoose
+	.connect(process.env.MONGO_DB_CONNECTION_URL)
+	.then((result) => {
+		User.findOne().then((user) => {
+			if (!user) {
+				const user = new User({
+					name: 'Lukas',
+					email: 'lukas@test.com',
+					cart: { items: [] },
+				});
+				user.save();
+			}
+		});
+		app.listen(8080);
+	})
+	.catch((err) => console.log(err));
