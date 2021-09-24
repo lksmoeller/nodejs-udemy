@@ -5,12 +5,12 @@ const Schema = mongoose.Schema;
 const orderSchema = new Schema({
 	products: [
 		{
-			productData: { type: Object, required: true },
+			product: { type: Object, required: true },
 			quantity: { type: Number, required: true },
 		},
 	],
 	user: {
-		name: {
+		email: {
 			type: String,
 			required: true,
 		},
