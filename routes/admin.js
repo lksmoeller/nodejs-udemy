@@ -21,7 +21,6 @@ router.post(
 	[
 		body('title').isString().isLength({ min: 3 }).trim(),
 		body('price').isFloat(),
-		body('imageUrl').notEmpty(), //.isURL(),
 		body('description').trim().isLength({ min: 5, max: 200 }),
 	],
 	adminController.postAddProduct
@@ -35,7 +34,6 @@ router.post(
 	[
 		body('title').isString().isLength({ min: 3 }).trim(),
 		body('price').isFloat(),
-		body('imageUrl').notEmpty(), //.isURL()
 		body('description').trim().isLength({ min: 5, max: 200 }),
 	],
 	adminController.postEditProduct
